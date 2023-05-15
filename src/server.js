@@ -1,34 +1,55 @@
 'use strict';
 
-
-const express = require('express');
-const cors = require('cors')
-
-// create express singleton
+// libraries
+require('dotenv').config();
+const express = require('express'); // server
 const app = express();
+const cors = require('cors'); // security
 
-
-// middleware
 app.use(cors());
-app.use(express.json());
 
-app.get('/', (req, res, next) => {
-  res.status(200).send('proof of life');
-});
-
-app.get('/success', (req, res, next) => {
-  res.status(200).send('Success!!');
-});
-
+// routes
+app.get('/', renderHome);
+app.get('/data', renderData);
 app.get('/bad', (req, res, next) => {
-  next('We have an error!');
-});
-
-app.use('*', (req, res, next) => {
-  res.status(404).send('Not Found');
+  // anytime you put anything inside of the next(), it will throw an error
+  next('you messed up');
 })
 
-const start = (port) => app.listen(port, () => console.log('listening on port:', port));
+// callback functions
+function renderHome(req, res){
+  res.status(200).send('Hello World');
+}
 
+function renderData(req, res, next){
+  const outputObj = {
+    even: true,
+    odd: false,
+  }
 
-module.exports = { start, app }
+  res.status(200).json(outputObj);
+}
+
+function notFound(req, res){
+  res.status(404).send('not found');
+}
+
+function handleServerError(error, req, res, next){
+  res.status(500).send({
+    error: 500, 
+    route: req.path, 
+    message: `SERVER ERROR: ${error}`
+  })
+}
+
+app.use('*', notFound);
+app.use(handleServerError);
+
+function start(port) {
+  app.listen(port, () => console.log(`server is listening on ${port}`));
+}
+
+module.exports = {
+  app: app,
+  start: start
+}
