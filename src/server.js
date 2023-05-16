@@ -22,9 +22,10 @@ function renderHome(req, res){
 }
 
 function renderData(req, res, next){
-  const outputObj = {
-    even: true,
-    odd: false,
+  let outputObj = {
+    even: "even",
+    odd: "odd",
+    "time": req.timestamp // we got this from the middleware
   }
 
   res.status(200).json(outputObj);
